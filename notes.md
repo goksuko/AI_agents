@@ -4,6 +4,8 @@ We call it Agent because it has agency, aka it has the ability to interact with 
 
 ##### An Agent is a system that leverages an AI model to interact with its environment in order to achieve a user-defined objective. It combines reasoning, planning, and the execution of actions (often via external tools) to fulfill tasks.
 
+#### AI agents are programs that use LLMs to generate ‘thoughts’ based on ‘observations’ to perform ‘actions’.
+
 an Agent is a system that uses an AI Model (typically an LLM) as its core reasoning engine, to:
 
 ##### Understand natural language: Interpret and respond to human instructions 
@@ -189,4 +191,125 @@ We will use Qwen/Qwen2.5-Coder-32B-Instruct as the LLM engine. This is a very ca
 
 "Serverless API": Instead of running the model on your own server, you'll access it through a cloud-based API — the infrastructure is managed for you. You just send a request and get a response, without worrying about deploying or maintaining the model.
 
+
+## When to Use an Agentic Framework
+- An LLM engine that powers the system.
+- A list of tools the agent can access.
+- A parser for extracting tool calls from the LLM output.
+- A system prompt synced with the parser.
+- A memory system.
+- Error logging and retry mechanisms to control LLM mistakes.
+
+smolagents: Agents framework developed by Hugging Face.	
+Llama-Index: End-to-end tooling to ship a context-augmented AI agent to production
+LangGraph: Agents allowing stateful orchestration of agents
+
+- code agents designed for software development tasks, 
+- tool calling agents for creating modular, 
+- function-driven workflows, and 
+- retrieval agents that access and synthesize information
+
++ orchestration of multiple agents 
++ the integration of vision capabilities and web browsing
+
+### smolagents
+#### CodeAgents are the primary type of agent in smolagents. Instead of generating JSON or text, these agents produce Python code to perform actions. 
+
+#### ToolCallingAgents are the second type of agent supported by smolagents. Unlike CodeAgents, which generate Python code, these agents rely on JSON/text blobs that the system must parse and interpret to execute actions. 
+
+#### Retrieval agents allow models access to knowledge bases, making it possible to search, synthesize, and retrieve information from multiple sources. They leverage vector stores for efficient retrieval and implement Retrieval-Augmented Generation (RAG) patterns. These agents are particularly useful for integrating web search with custom knowledge bases while maintaining conversation context through memory systems.
+
+#### Orchestrating multiple agents effectively is crucial for building powerful, multi-agent systems. By combining agents with different capabilities—such as a web search agent with a code execution agent—you can create more sophisticated solutions.
+
+#### Vision agents extend traditional agent capabilities by incorporating Vision-Language Models (VLMs), enabling them to process and interpret visual information. 
+
+### Key Advantages of smolagents
+- Simplicity: Minimal code complexity and abstractions, to make the framework easy to understand, adopt and extend
+- Flexible LLM Support: Works with any LLM through integration with Hugging Face tools and external APIs
+- Code-First Approach: First-class support for Code Agents that write their actions directly in code, removing the need for parsing and simplifying tool calling
+- HF Hub Integration: Seamless integration with the Hugging Face Hub, allowing the use of Gradio Spaces as tools
+
+### When to use smolagents?
+- You need a lightweight and minimal solution.
+- You want to experiment quickly without complex configurations.
+- Your application logic is straightforward.
+
+### Code vs. JSON Actions
+Unlike other frameworks where agents write actions in JSON, smolagents focuses on tool calls in code, simplifying the execution process. This is because there’s no need to parse the JSON in order to build code that calls the tools: the output can be executed directly.
+
+![the difference between Code vs JSON Actions](https://cdn-lfs.hf.co/datasets/huggingface/documentation-images/2d3c40c6213af765c3caff5a18210cd75f5722ce6a012f99a5eb4cb6536965fc?response-content-disposition=inline%3B+filename*%3DUTF-8%27%27code_vs_json_actions.png%3B+filename%3D%22code_vs_json_actions.png%22%3B&response-content-type=image%2Fpng&Expires=1751663257&Policy=eyJTdGF0ZW1lbnQiOlt7IkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc1MTY2MzI1N319LCJSZXNvdXJjZSI6Imh0dHBzOi8vY2RuLWxmcy5oZi5jby9kYXRhc2V0cy9odWdnaW5nZmFjZS9kb2N1bWVudGF0aW9uLWltYWdlcy8yZDNjNDBjNjIxM2FmNzY1YzNjYWZmNWExODIxMGNkNzVmNTcyMmNlNmEwMTJmOTlhNWViNGNiNjUzNjk2NWZjP3Jlc3BvbnNlLWNvbnRlbnQtZGlzcG9zaXRpb249KiZyZXNwb25zZS1jb250ZW50LXR5cGU9KiJ9XX0_&Signature=Wmtt2hnmoM3p4qUW1tEJq6IJhw07uyKVFtAXKZHLsO2BdYQV%7EM3rDxo-CVtCpvmxDx0zkLnPGyOyfWQrX0FOIuDmTICQeUMg72hvNVaiEe5QcyVL2NDDW5stDEpjsT-X0QWpIIub9wJtoClp7zl7JihfVu7tSWq9dR-OMHXbIja9tFJTwWNFDNC70EJaMyTWlJLEidoeRWHNjZOAMWf4umALVUdRPpYXss%7EM96XqTP3sejq7BU0bz5sc5atF-9-7QXldSSGUG1IQdPFhJHjfn924f4RQfQwG5xdZNOVb4GMLbV4axWozzJue0yYN3aS2cv11PoHDPST3MctpsikhXA__&Key-Pair-Id=K3RPWS32NSSJCE)
+
+The framework provides several predefined classes to simplify model connections:
+
+- TransformersModel: Implements a local transformers pipeline for seamless integration.
+- InferenceClientModel: Supports serverless inference calls through Hugging Face’s infrastructure, or via a growing number of third-party inference providers.
+- LiteLLMModel: Leverages LiteLLM for lightweight model interactions.
+- OpenAIServerModel: Connects to any service that offers an OpenAI API interface.
+- AzureOpenAIServerModel: Supports integration with any Azure OpenAI deployment.
+
+### Why Code Agents?
+In a multi-step agent process, the LLM writes and executes actions, typically involving external tool calls. Traditional approaches use a JSON format to specify tool names and arguments as strings, which the system must parse to determine which tool to execute. However, research shows that tool-calling LLMs work more effectively with code directly.
+
+Writing actions in code rather than JSON offers several key advantages:
+
+- Composability: Easily combine and reuse actions
+- Object Management: Work directly with complex structures like images
+- Generality: Express any computationally possible task
+- Natural for LLMs: High-quality code is already present in LLM training data
+
+![how CodeAgent.run() operates, following the ReAct framework](https://cdn-lfs.hf.co/datasets/huggingface/documentation-images/6fd077476c038d7434c9450f1c8fd460b15d886eb083e13492547d7558d8be89?response-content-disposition=inline%3B+filename*%3DUTF-8%27%27codeagent_docs.png%3B+filename%3D%22codeagent_docs.png%22%3B&response-content-type=image%2Fpng&Expires=1751666615&Policy=eyJTdGF0ZW1lbnQiOlt7IkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc1MTY2NjYxNX19LCJSZXNvdXJjZSI6Imh0dHBzOi8vY2RuLWxmcy5oZi5jby9kYXRhc2V0cy9odWdnaW5nZmFjZS9kb2N1bWVudGF0aW9uLWltYWdlcy82ZmQwNzc0NzZjMDM4ZDc0MzRjOTQ1MGYxYzhmZDQ2MGIxNWQ4ODZlYjA4M2UxMzQ5MjU0N2Q3NTU4ZDhiZTg5P3Jlc3BvbnNlLWNvbnRlbnQtZGlzcG9zaXRpb249KiZyZXNwb25zZS1jb250ZW50LXR5cGU9KiJ9XX0_&Signature=GA9K8mt5eUBMdVrCScQlj-%7E5Nzt9nE5Iv64lTnynXiaKcUsSqEkI-CQDrIjaHTZv8eD8QAaKQ1C-dNKc5LxkTXB5jvHFw0DdrC1Q8iDsVxL7kitQCP8wN-InQ8h5d8EIT7ENAR4Qb9p7yhHu1hDB1iDPuQXBBOIVnuq-EY5Xa4dfTKF65IzwpCTejtHw8GE%7E69YbyFq1OgwB9PBCjdgfCQBz2cbvBMB00gQ%7EGFZOzw%7EPOMrXW2O%7ELGgFm-Q3OOyl5%7E06F4lisMBc7cD5XWzJcNmC1It0Aq3tR8wZgbBnY13u6-Nof-w9DsA9zHCpkx0C1qMpqYbiGDri6XQz6p9xaA__&Key-Pair-Id=K3RPWS32NSSJCE)
+
+A CodeAgent performs actions through a cycle of steps, with existing variables and knowledge being incorporated into the agent’s context, which is kept in an execution log:
+
+The system prompt is stored in a SystemPromptStep, and the user query is logged in a TaskStep.
+
+Then, the following while loop is executed:
+
+2.1 Method agent.write_memory_to_messages() writes the agent’s logs into a list of LLM-readable chat messages.
+
+2.2 These messages are sent to a Model, which generates a completion.
+
+2.3 The completion is parsed to extract the action, which, in our case, should be a code snippet since we’re working with a CodeAgent.
+
+2.4 The action is executed.
+
+2.5 The results are logged into memory in an ActionStep.
+
+At the end of each step, if the agent includes any function calls (in agent.step_callback), they are executed.
+
+Code execution has strict security measures - imports outside a predefined safe list are blocked by default. However, you can authorize additional imports by passing them as strings in additional_authorized_imports. When creating the agent, we’ll use additional_authorized_imports to allow for importing the datetime module.
+
+`smolagents` specializes in agents that write and execute Python code snippets, offering sandboxed execution for security. It supports both open-source and proprietary language models, making it adaptable to various development environments.
+
+
+```
+# Change to your username and repo name and push to hub
+agent.push_to_hub('sergiopaniego/AlfredAgent')
+# Change to your username and repo name and download from hub
+alfred_agent = agent.from_hub('sergiopaniego/AlfredAgent', trust_remote_code=True)
+# Run the agent
+alfred_agent.run("Give me the best playlist for a party at Wayne's mansion. The party idea is a 'villain masquerade' theme")
+``` 
+
+
+### Inspecting Our Party Preparator Agent with OpenTelemetry and Langfuse
+
+Once again, smolagents comes to the rescue! It embraces the OpenTelemetry standard for instrumenting agent runs, allowing seamless inspection and logging. With the help of Langfuse and the SmolagentsInstrumentor, Alfred can easily track and analyze his agent’s behavior.
+
+```
+pip install opentelemetry-sdk opentelemetry-exporter-otlp openinference-instrumentation-smolagents langfuse
+```
+
+
+```
+import os
+
+# Get keys for your project from the project settings page: https://cloud.langfuse.com
+os.environ["LANGFUSE_PUBLIC_KEY"] = "pk-lf-..." 
+os.environ["LANGFUSE_SECRET_KEY"] = "sk-lf-..." 
+os.environ["LANGFUSE_HOST"] = "https://cloud.langfuse.com" # 🇪🇺 EU region
+# os.environ["LANGFUSE_HOST"] = "https://us.cloud.langfuse.com" # 🇺🇸 US region
+```
+
+## Tool Calling Agent
 
